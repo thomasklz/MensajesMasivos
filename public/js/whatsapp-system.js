@@ -464,7 +464,7 @@ async function startBulkSending() {
     $('#advancedProgress').slideDown();
     updateConnectionDisplay(true, 'Procesando envío masivo...');
     
-    // Mostrar notificación de inicio (NO modal)
+    // Mostrar ficación de inicio (NO modal)
     Swal.fire({
         icon: 'info',
         title: 'Envío Iniciado',
@@ -1039,12 +1039,1024 @@ $(document).ready(function() {
     }, 1000);
 });
 
+/*
+ * ============================
+ * PLANTILLAS DINÁMICAS - JAVASCRIPT ADICIONAL
+ * ============================
+ */
+
+// AGREGAR AL FINAL DEL ARCHIVO whatsapp-system.js EXISTENTE
+
 // ============================
-// FUNCIONES GLOBALES
+// VARIABLES GLOBALES PARA PLANTILLAS
+// ============================
+
+let savedTemplates = [];
+let selectedTemplate = null;
+let currentEditingTemplate = null;
+
+// Variables dinámicas disponibles
+const AVAILABLE_VARIABLES = {
+    '{nombre}': 'Nombre del contacto',
+    '{valor}': 'Valor o monto',
+    '{fecha}': 'Fecha actual',
+    '{mes}': 'Mes actual',
+    '{año}': 'Año actual',
+    '{telefono}': 'Teléfono del contacto',
+    '{empresa}': 'Nombre de la empresa',
+    '{personalizado1}': 'Campo personalizado 1',
+    '{personalizado2}': 'Campo personalizado 2'
+};
+
+// ============================
+// FUNCIONES DE GESTIÓN DE PLANTILLAS
+// ============================
+
+function initializeTemplateSystem() {
+    loadSavedTemplates();
+    initializeTemplateEvents();
+    initializeTemplatePreview();
+    updateTemplateCounter();
+}
+
+function loadSavedTemplates() {
+    // Cargar plantillas desde localStorage (en producción sería desde la base de datos)
+    const stored = localStorage.getItem('whatsapp_templates');
+    if (stored) {
+        try {
+            savedTemplates = JSON.parse(stored);
+            displayTemplates();
+        } catch (e) {
+            console.error('Error cargando plantillas:', e);
+            savedTemplates = [];
+        }
+    } else {
+        // Plantillas por defecto
+        savedTemplates = [
+            {
+                id: generateTemplateId(),
+                name: 'Recordatorio de Pago',
+                category: 'cobranza',
+                content: '📢 *RECORDATORIO DE PAGO* 📢\n\nEstimad@ *{nombre}*,\n\nLe recordamos que tiene un saldo pendiente de *{valor}* correspondiente al mes de *{mes}*.\n\n*Fecha límite de pago:* {fecha}\n\n*Para mayor información contacte al +593 96 847 1674*\n\n¡Gracias por su atención! 😊',
+                isDefault: true,
+                createdAt: new Date().toISOString(),
+                usageCount: 0
+            },
+            {
+                id: generateTemplateId(),
+                name: 'Promoción Especial',
+                category: 'promociones',
+                content: '🎉 *¡OFERTA ESPECIAL!* 🎉\n\nHola *{nombre}*,\n\nTenemos una promoción exclusiva para ti:\n*50% de descuento* en tu próximo pago\n\n*Válido hasta:* {fecha}\n*Tu ahorro sería:* {valor}\n\n¡No te lo pierdas!\n\n*{empresa}* 📱',
+                isDefault: false,
+                createdAt: new Date().toISOString(),
+                usageCount: 0
+            }
+        ];
+        saveTemplatesToStorage();
+        displayTemplates();
+    }
+}
+
+function saveTemplatesToStorage() {
+    localStorage.setItem('whatsapp_templates', JSON.stringify(savedTemplates));
+}
+
+function generateTemplateId() {
+    return 'tpl_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+// ============================
+// VISUALIZACIÓN DE PLANTILLAS
+// ============================
+
+function displayTemplates(filter = 'all') {
+    const container = $('#templatesList');
+    const filteredTemplates = filter === 'all' 
+        ? savedTemplates 
+        : savedTemplates.filter(t => t.category === filter);
+
+    if (filteredTemplates.length === 0) {
+        container.html(`
+            <div class="empty-state">
+                <i class="fas fa-file-alt"></i>
+                <h5>No hay plantillas</h5>
+                <p>${filter === 'all' ? 'No tienes plantillas guardadas aún' : 'No hay plantillas en esta categoría'}</p>
+                <button class="btn btn-primary" onclick="$('#templates-tab').click()">
+                    <i class="fas fa-plus me-2"></i>Crear Primera Plantilla
+                </button>
+            </div>
+        `);
+        return;
+    }
+
+    let html = '';
+    filteredTemplates.forEach(template => {
+        const isDefault = template.isDefault ? 'template-default' : '';
+        const categoryClass = `category-${template.category}`;
+        
+        html += `
+            <div class="template-item ${isDefault}" data-id="${template.id}" data-category="${template.category}">
+                <div class="template-header">
+                    <h6 class="template-name">${escapeHtml(template.name)}</h6>
+                    <span class="template-category ${categoryClass}">${getCategoryName(template.category)}</span>
+                </div>
+                
+                <div class="template-content-preview">${escapeHtml(template.content)}</div>
+                
+                <div class="template-meta">
+                    <span><i class="fas fa-calendar-alt me-1"></i>${formatDate(template.createdAt)}</span>
+                    <span><i class="fas fa-chart-bar me-1"></i>Usado ${template.usageCount || 0} veces</span>
+                </div>
+                
+                <div class="template-floating-actions">
+                    <button class="floating-btn edit" onclick="editTemplate('${template.id}')" 
+                            title="Editar plantilla">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="floating-btn duplicate" onclick="duplicateTemplate('${template.id}')" 
+                            title="Duplicar plantilla">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                    ${!template.isDefault ? `
+                    <button class="floating-btn set-default" onclick="setAsDefault('${template.id}')" 
+                            title="Establecer por defecto">
+                        <i class="fas fa-star"></i>
+                    </button>
+                    ` : ''}
+                    <button class="floating-btn delete" onclick="deleteTemplate('${template.id}')" 
+                            title="Eliminar plantilla">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                
+                <div class="template-char-count">${template.content.length} chars</div>
+            </div>
+        `;
+    });
+
+    container.html(html);
+    updateTemplateCounter();
+    
+    // Agregar event listeners para selección
+    $('.template-item').click(function(e) {
+        if ($(e.target).closest('.template-floating-actions').length) return;
+        
+        $('.template-item').removeClass('selected');
+        $(this).addClass('selected');
+        selectedTemplate = $(this).data('id');
+        
+        const template = getTemplateById(selectedTemplate);
+        if (template) {
+            showTemplatePreview(template);
+        }
+    });
+}
+
+function updateTemplateCounter() {
+    const total = savedTemplates.length;
+    const byCategory = savedTemplates.reduce((acc, template) => {
+        acc[template.category] = (acc[template.category] || 0) + 1;
+        return acc;
+    }, {});
+
+    $('.templates-counter').html(`
+        <strong>Total:</strong> ${total} plantillas |
+        <strong>Cobranza:</strong> ${byCategory.cobranza || 0} |
+        <strong>Promociones:</strong> ${byCategory.promociones || 0} |
+        <strong>Informativo:</strong> ${byCategory.informativo || 0} |
+        <strong>Soporte:</strong> ${byCategory.soporte || 0} |
+        <strong>Otro:</strong> ${byCategory.otro || 0}
+    `);
+}
+
+// ============================
+// OPERACIONES CRUD DE PLANTILLAS
+// ============================
+
+function saveTemplate() {
+    const form = $('#templateForm');
+    const name = $('#templateName').val().trim();
+    const category = $('#templateCategory').val();
+    const content = $('#templateContent').val().trim();
+    const isDefault = $('#templateDefault').is(':checked');
+
+    if (!name || !content) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Campos Requeridos',
+            text: 'Por favor completa el nombre y contenido de la plantilla',
+            confirmButtonText: 'Entendido'
+        });
+        return;
+    }
+
+    // Si se marca como por defecto, quitar el flag de otras plantillas
+    if (isDefault) {
+        savedTemplates.forEach(t => t.isDefault = false);
+    }
+
+    const template = {
+        id: currentEditingTemplate || generateTemplateId(),
+        name: name,
+        category: category,
+        content: content,
+        isDefault: isDefault,
+        createdAt: currentEditingTemplate ? 
+            getTemplateById(currentEditingTemplate).createdAt : 
+            new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        usageCount: currentEditingTemplate ? 
+            getTemplateById(currentEditingTemplate).usageCount || 0 : 0
+    };
+
+    if (currentEditingTemplate) {
+        // Actualizar plantilla existente
+        const index = savedTemplates.findIndex(t => t.id === currentEditingTemplate);
+        if (index !== -1) {
+            savedTemplates[index] = template;
+        }
+        currentEditingTemplate = null;
+    } else {
+        // Nueva plantilla
+        savedTemplates.unshift(template);
+    }
+
+    saveTemplatesToStorage();
+    displayTemplates();
+    form[0].reset();
+    
+    Swal.fire({
+        icon: 'success',
+        title: '¡Plantilla Guardada!',
+        text: `La plantilla "${name}" se guardó correctamente`,
+        timer: 2000,
+        showConfirmButton: false,
+        position: 'top-end',
+        toast: true
+    });
+}
+
+function editTemplate(templateId) {
+    const template = getTemplateById(templateId);
+    if (!template) return;
+
+    currentEditingTemplate = templateId;
+    
+    $('#templateName').val(template.name);
+    $('#templateCategory').val(template.category);
+    $('#templateContent').val(template.content);
+    $('#templateDefault').prop('checked', template.isDefault);
+    
+    $('#saveTemplateBtn').html('<i class="fas fa-save me-2"></i>Actualizar Plantilla');
+    
+    // Scroll al formulario
+    $('html, body').animate({
+        scrollTop: $('#templateForm').offset().top - 100
+    }, 500);
+    
+    Swal.fire({
+        icon: 'info',
+        title: 'Modo Edición',
+        text: `Editando la plantilla "${template.name}"`,
+        timer: 2000,
+        showConfirmButton: false,
+        position: 'top-end',
+        toast: true
+    });
+}
+
+function duplicateTemplate(templateId) {
+    const template = getTemplateById(templateId);
+    if (!template) return;
+
+    const newTemplate = {
+        ...template,
+        id: generateTemplateId(),
+        name: template.name + ' (Copia)',
+        isDefault: false,
+        createdAt: new Date().toISOString(),
+        usageCount: 0
+    };
+
+    savedTemplates.unshift(newTemplate);
+    saveTemplatesToStorage();
+    displayTemplates();
+    
+    Swal.fire({
+        icon: 'success',
+        title: 'Plantilla Duplicada',
+        text: `Se creó una copia de "${template.name}"`,
+        timer: 2000,
+        showConfirmButton: false,
+        position: 'top-end',
+        toast: true
+    });
+}
+
+function deleteTemplate(templateId) {
+    const template = getTemplateById(templateId);
+    if (!template) return;
+
+    Swal.fire({
+        icon: 'warning',
+        title: '¿Eliminar Plantilla?',
+        html: `¿Estás seguro de que quieres eliminar la plantilla <strong>"${template.name}"</strong>?<br><small class="text-muted">Esta acción no se puede deshacer</small>`,
+        showCancelButton: true,
+        confirmButtonText: 'Sí, Eliminar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#dc3545'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            savedTemplates = savedTemplates.filter(t => t.id !== templateId);
+            saveTemplatesToStorage();
+            displayTemplates();
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Plantilla Eliminada',
+                text: `La plantilla "${template.name}" fue eliminada`,
+                timer: 2000,
+                showConfirmButton: false,
+                position: 'top-end',
+                toast: true
+            });
+        }
+    });
+}
+
+function setAsDefault(templateId) {
+    // Quitar flag por defecto de todas las plantillas
+    savedTemplates.forEach(t => t.isDefault = false);
+    
+    // Establecer la nueva plantilla por defecto
+    const template = getTemplateById(templateId);
+    if (template) {
+        template.isDefault = true;
+        saveTemplatesToStorage();
+        displayTemplates();
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'Plantilla por Defecto',
+            text: `"${template.name}" es ahora la plantilla por defecto`,
+            timer: 2000,
+            showConfirmButton: false,
+            position: 'top-end',
+            toast: true
+        });
+    }
+}
+
+// ============================
+// VISTA PREVIA DE PLANTILLAS
+// ============================
+
+function initializeTemplatePreview() {
+    updatePreviewTime();
+    setInterval(updatePreviewTime, 60000); // Actualizar cada minuto
+}
+
+function showTemplatePreview(template) {
+    if (!template) return;
+
+    $('#templatePreviewSection').slideDown();
+    renderTemplatePreview(template.content);
+}
+
+function renderTemplatePreview(templateContent) {
+    if (!templateContent) {
+        $('#previewContent').text('Selecciona una plantilla para ver la vista previa');
+        return;
+    }
+
+    // Obtener valores de prueba
+    const previewData = {
+        nombre: $('#previewNombre').val() || 'Juan Pérez',
+        valor: $('#previewValor').val() || '$45.50',
+        telefono: $('#previewTelefono').val() || '593998765432',
+        empresa: $('#previewEmpresa').val() || 'La SIMPAR',
+        personalizado1: $('#previewPersonalizado1').val() || '',
+        personalizado2: $('#previewPersonalizado2').val() || '',
+        fecha: new Date().toLocaleDateString('es-ES'),
+        mes: new Date().toLocaleDateString('es-ES', { month: 'long' }).toUpperCase(),
+        año: new Date().getFullYear()
+    };
+
+    // Reemplazar variables
+    let renderedContent = templateContent;
+    Object.keys(previewData).forEach(key => {
+        const regex = new RegExp(`{${key}}`, 'g');
+        renderedContent = renderedContent.replace(regex, previewData[key]);
+    });
+
+    // Convertir a HTML para WhatsApp (negrita, cursiva, etc.)
+    renderedContent = formatWhatsAppText(renderedContent);
+    
+    $('#previewContent').html(renderedContent);
+}
+
+function formatWhatsAppText(text) {
+    return text
+        .replace(/\*([^*]+)\*/g, '<strong>$1</strong>') // *negrita*
+        .replace(/_([^_]+)_/g, '<em>$1</em>') // _cursiva_
+        .replace(/~([^~]+)~/g, '<del>$1</del>') // ~tachado~
+        .replace(/```([^`]+)```/g, '<code>$1</code>') // ```código```
+        .replace(/\n/g, '<br>'); // saltos de línea
+}
+
+function updatePreviewTime() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('es-ES', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
+    $('#previewTime').text(timeString);
+}
+
+// ============================
+// INTEGRACIÓN CON ENVÍO MASIVO
+// ============================
+
+function loadTemplateIntoMessage() {
+    const template = getTemplateById(selectedTemplate);
+    if (!template) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Sin Selección',
+            text: 'Por favor selecciona una plantilla primero',
+            confirmButtonText: 'Entendido'
+        });
+        return;
+    }
+
+    $('#messageTemplate').val(template.content);
+    updateBulkButton();
+    
+    // Incrementar contador de uso
+    template.usageCount = (template.usageCount || 0) + 1;
+    saveTemplatesToStorage();
+    
+    Swal.fire({
+        icon: 'success',
+        title: 'Plantilla Cargada',
+        text: `La plantilla "${template.name}" se cargó en el editor`,
+        timer: 2000,
+        showConfirmButton: false,
+        position: 'top-end',
+        toast: true
+    });
+    
+    // Cambiar a la pestaña de envío masivo
+    $('#bulk-tab').click();
+}
+
+function saveCurrentMessageAsTemplate() {
+    const content = $('#messageTemplate').val().trim();
+    if (!content) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Sin Contenido',
+            text: 'Escribe un mensaje antes de guardarlo como plantilla',
+            confirmButtonText: 'Entendido'
+        });
+        return;
+    }
+
+    // Mostrar modal para guardar
+    $('#saveTemplateModal').modal('show');
+}
+
+// ============================
+// EVENT LISTENERS
+// ============================
+
+function initializeTemplateEvents() {
+    // Formulario principal de plantillas
+    $('#templateForm').submit(function(e) {
+        e.preventDefault();
+        saveTemplate();
+    });
+
+    // Vista previa
+    $('#previewTemplateBtn').click(function() {
+        const content = $('#templateContent').val();
+        if (content.trim()) {
+            renderTemplatePreview(content);
+            $('#templatePreviewSection').slideDown();
+        }
+    });
+
+    // Actualizar vista previa con datos de prueba
+    $('#updatePreviewBtn').click(function() {
+        const content = $('#templateContent').val() || 
+                      (selectedTemplate ? getTemplateById(selectedTemplate).content : '');
+        renderTemplatePreview(content);
+    });
+
+    // Cargar plantilla en mensaje masivo
+    $('#loadTemplateBtn').click(function() {
+        showTemplateSelector();
+    });
+
+    // Guardar mensaje actual como plantilla
+    $('#saveAsTemplateBtn').click(function() {
+        saveCurrentMessageAsTemplate();
+    });
+
+    // Modal de guardar plantilla rápida
+    $('#saveQuickTemplateBtn').click(function() {
+        const name = $('#quickTemplateName').val().trim();
+        const category = $('#quickTemplateCategory').val();
+        const isDefault = $('#quickTemplateDefault').is(':checked');
+        const content = $('#messageTemplate').val().trim();
+
+        if (!name) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Nombre Requerido',
+                text: 'Por favor ingresa un nombre para la plantilla',
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
+
+        // Si se marca como por defecto, quitar el flag de otras plantillas
+        if (isDefault) {
+            savedTemplates.forEach(t => t.isDefault = false);
+        }
+
+        const template = {
+            id: generateTemplateId(),
+            name: name,
+            category: category,
+            content: content,
+            isDefault: isDefault,
+            createdAt: new Date().toISOString(),
+            usageCount: 0
+        };
+
+        savedTemplates.unshift(template);
+        saveTemplatesToStorage();
+        displayTemplates();
+
+        $('#saveTemplateModal').modal('hide');
+        $('#quickTemplateName').val('');
+        
+        Swal.fire({
+            icon: 'success',
+            title: '¡Plantilla Guardada!',
+            text: `La plantilla "${name}" se guardó correctamente`,
+            timer: 2000,
+            showConfirmButton: false,
+            position: 'top-end',
+            toast: true
+        });
+    });
+
+    // Filtros de categoría
+    $('.filter-category').click(function(e) {
+        e.preventDefault();
+        const category = $(this).data('category');
+        displayTemplates(category);
+        
+        // Actualizar estado visual del filtro
+        $('.filter-category').removeClass('active');
+        $(this).addClass('active');
+    });
+
+    // Variables dinámicas automáticas en el editor
+    $('#templateContent').on('input', function() {
+        highlightVariables($(this));
+    });
+
+    $('#messageTemplate').on('input', function() {
+        highlightVariables($(this));
+    });
+}
+
+// ============================
+// MODAL DE SELECCIÓN DE PLANTILLAS
+// ============================
+
+function showTemplateSelector() {
+    if (savedTemplates.length === 0) {
+        Swal.fire({
+            icon: 'info',
+            title: 'Sin Plantillas',
+            text: 'No tienes plantillas guardadas. Crea una plantilla primero.',
+            confirmButtonText: 'Crear Plantilla',
+            showCancelButton: true,
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $('#templates-tab').click();
+            }
+        });
+        return;
+    }
+
+    loadTemplatesInModal();
+    $('#templateSelectorModal').modal('show');
+}
+
+function loadTemplatesInModal() {
+    const container = $('#modalTemplatesList');
+    let html = '';
+
+    savedTemplates.forEach(template => {
+        const isDefault = template.isDefault ? '★ ' : '';
+        html += `
+            <div class="modal-template-item" data-id="${template.id}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <strong>${isDefault}${escapeHtml(template.name)}</strong>
+                        <div class="small text-muted">${getCategoryName(template.category)}</div>
+                    </div>
+                    <span class="badge bg-secondary">${template.content.length}</span>
+                </div>
+            </div>
+        `;
+    });
+
+    container.html(html);
+
+    // Event listeners para selección en modal
+    $('.modal-template-item').click(function() {
+        $('.modal-template-item').removeClass('selected');
+        $(this).addClass('selected');
+        
+        const templateId = $(this).data('id');
+        const template = getTemplateById(templateId);
+        
+        if (template) {
+            $('#modalTemplatePreview').html(formatWhatsAppText(template.content));
+            $('#modalTemplateCategory').text(getCategoryName(template.category));
+            $('#modalTemplateDate').text(formatDate(template.createdAt));
+            $('#selectTemplateBtn').prop('disabled', false).data('template-id', templateId);
+        }
+    });
+}
+
+// Event listener para el botón de seleccionar plantilla en modal
+$(document).ready(function() {
+    $('#selectTemplateBtn').click(function() {
+        const templateId = $(this).data('template-id');
+        const template = getTemplateById(templateId);
+        
+        if (template) {
+            $('#messageTemplate').val(template.content);
+            updateBulkButton();
+            
+            // Incrementar contador de uso
+            template.usageCount = (template.usageCount || 0) + 1;
+            saveTemplatesToStorage();
+            
+            $('#templateSelectorModal').modal('hide');
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Plantilla Aplicada',
+                text: `Se aplicó la plantilla "${template.name}"`,
+                timer: 2000,
+                showConfirmButton: false,
+                position: 'top-end',
+                toast: true
+            });
+        }
+    });
+});
+
+// ============================
+// FUNCIONES DE UTILIDAD
+// ============================
+
+function getTemplateById(id) {
+    return savedTemplates.find(t => t.id === id);
+}
+
+function getCategoryName(category) {
+    const categories = {
+        cobranza: 'Cobranza',
+        promociones: 'Promociones',
+        informativo: 'Informativo',
+        soporte: 'Soporte',
+        otro: 'Otro'
+    };
+    return categories[category] || 'Otro';
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function highlightVariables(textarea) {
+    // Esta función podría implementar resaltado de variables en tiempo real
+    // Por simplicidad, solo contaremos caracteres por ahora
+    const length = textarea.val().length;
+    textarea.siblings('.template-char-count, #templateCharCount').text(`${length} caracteres`);
+}
+
+// ============================
+// PROCESAMIENTO DE VARIABLES DINÁMICAS
+// ============================
+
+function processMessageWithVariables(messageTemplate, contact) {
+    if (!messageTemplate || !contact) return messageTemplate;
+
+    // Datos actuales
+    const now = new Date();
+    const currentData = {
+        fecha: now.toLocaleDateString('es-ES'),
+        mes: now.toLocaleDateString('es-ES', { month: 'long' }).toUpperCase(),
+        año: now.getFullYear(),
+        empresa: 'Cable Hogar' // Esto podría venir de configuración
+    };
+
+    // Combinar datos del contacto con datos actuales
+    const allData = {
+        nombre: contact.name || '',
+        valor: contact.value || '',
+        telefono: contact.phone || '',
+        personalizado1: contact.custom1 || '',
+        personalizado2: contact.custom2 || '',
+        ...currentData
+    };
+
+    // Reemplazar todas las variables
+    let processedMessage = messageTemplate;
+    Object.keys(allData).forEach(key => {
+        const regex = new RegExp(`{${key}}`, 'g');
+        processedMessage = processedMessage.replace(regex, allData[key]);
+    });
+
+    return processedMessage;
+}
+
+// ============================
+// MODIFICAR FUNCIÓN DE ENVÍO PARA USAR PLANTILLAS
+// ============================
+
+// MODIFICAR LA FUNCIÓN sendSingleMessageInternal EXISTENTE para usar variables dinámicas
+async function sendSingleMessageInternal(contact, message) {
+    try {
+        // Procesar mensaje con variables dinámicas
+        const processedMessage = processMessageWithVariables(message, contact);
+        
+        const response = await $.post('/whatsapp/send-single', {
+            phone: contact.phone,
+            message: processedMessage
+        });
+        
+        return {
+            name: contact.name,
+            phone: contact.phone,
+            success: response.success,
+            message: response.success ? 'Enviado correctamente' : response.message,
+            attempts: 1,
+            processedMessage: processedMessage // Para debugging
+        };
+        
+    } catch (xhr) {
+        let errorMessage = 'Error de conexión';
+        try {
+            const response = JSON.parse(xhr.responseText);
+            errorMessage = response.message || errorMessage;
+        } catch (e) {
+            // Mantener mensaje por defecto
+        }
+        
+        return {
+            name: contact.name,
+            phone: contact.phone,
+            success: false,
+            message: errorMessage,
+            attempts: 1
+        };
+    }
+}
+
+// ============================
+// IMPORTAR/EXPORTAR PLANTILLAS
+// ============================
+
+function exportTemplates() {
+    const dataStr = JSON.stringify(savedTemplates, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `plantillas_whatsapp_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    Swal.fire({
+        icon: 'success',
+        title: 'Plantillas Exportadas',
+        text: 'Las plantillas se descargaron correctamente',
+        timer: 2000,
+        showConfirmButton: false,
+        position: 'top-end',
+        toast: true
+    });
+}
+
+function importTemplates() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    
+    input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedTemplates = JSON.parse(e.target.result);
+                
+                if (!Array.isArray(importedTemplates)) {
+                    throw new Error('Formato de archivo inválido');
+                }
+                
+                // Validar estructura de plantillas
+                const validTemplates = importedTemplates.filter(template => 
+                    template.name && template.content && template.category
+                );
+                
+                if (validTemplates.length === 0) {
+                    throw new Error('No se encontraron plantillas válidas en el archivo');
+                }
+                
+                Swal.fire({
+                    icon: 'question',
+                    title: 'Importar Plantillas',
+                    html: `Se encontraron <strong>${validTemplates.length}</strong> plantillas válidas.<br>¿Cómo quieres importarlas?`,
+                    showCancelButton: true,
+                    confirmButtonText: 'Reemplazar Todas',
+                    cancelButtonText: 'Agregar a Existentes',
+                    showDenyButton: true,
+                    denyButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Reemplazar todas
+                        savedTemplates = validTemplates.map(t => ({
+                            ...t,
+                            id: generateTemplateId(),
+                            createdAt: new Date().toISOString(),
+                            usageCount: 0
+                        }));
+                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                        // Agregar a existentes
+                        const newTemplates = validTemplates.map(t => ({
+                            ...t,
+                            id: generateTemplateId(),
+                            createdAt: new Date().toISOString(),
+                            usageCount: 0,
+                            isDefault: false // No mantener defaults al importar
+                        }));
+                        savedTemplates = [...newTemplates, ...savedTemplates];
+                    } else {
+                        return;
+                    }
+                    
+                    saveTemplatesToStorage();
+                    displayTemplates();
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Plantillas Importadas',
+                        text: `Se importaron ${validTemplates.length} plantillas correctamente`,
+                        timer: 3000,
+                        showConfirmButton: false,
+                        position: 'top-end',
+                        toast: true
+                    });
+                });
+                
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de Importación',
+                    text: 'El archivo no tiene el formato correcto: ' + error.message,
+                    confirmButtonText: 'Entendido'
+                });
+            }
+        };
+        
+        reader.readAsText(file);
+    };
+    
+    input.click();
+}
+
+// ============================
+// BÚSQUEDA Y FILTRADO DE PLANTILLAS
+// ============================
+
+function initializeTemplateSearch() {
+    // Agregar campo de búsqueda si no existe
+    if ($('#templateSearch').length === 0) {
+        const searchHtml = `
+            <div class="template-search mb-3">
+                <input type="text" class="form-control" id="templateSearch" 
+                       placeholder="Buscar plantillas por nombre o contenido...">
+            </div>
+        `;
+        $('#templatesList').before(searchHtml);
+    }
+    
+    // Event listener para búsqueda en tiempo real
+    $('#templateSearch').on('input', function() {
+        const searchTerm = $(this).val().toLowerCase().trim();
+        searchTemplates(searchTerm);
+    });
+}
+
+function searchTemplates(searchTerm) {
+    if (!searchTerm) {
+        displayTemplates();
+        return;
+    }
+    
+    const filteredTemplates = savedTemplates.filter(template => 
+        template.name.toLowerCase().includes(searchTerm) ||
+        template.content.toLowerCase().includes(searchTerm) ||
+        getCategoryName(template.category).toLowerCase().includes(searchTerm)
+    );
+    
+    displayFilteredTemplates(filteredTemplates, `Resultados para: "${searchTerm}"`);
+}
+
+function displayFilteredTemplates(templates, title) {
+    const container = $('#templatesList');
+    
+    if (templates.length === 0) {
+        container.html(`
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <h5>Sin Resultados</h5>
+                <p>${title}</p>
+                <button class="btn btn-outline-primary" onclick="$('#templateSearch').val('').trigger('input')">
+                    <i class="fas fa-times me-2"></i>Limpiar Búsqueda
+                </button>
+            </div>
+        `);
+        return;
+    }
+    
+    // Reutilizar la función de display existente con los templates filtrados
+    const originalTemplates = savedTemplates;
+    savedTemplates = templates;
+    displayTemplates();
+    savedTemplates = originalTemplates;
+}
+
+// ============================
+// INICIALIZACIÓN COMPLETA
+// ============================
+
+// MODIFICAR LA FUNCIÓN $(document).ready EXISTENTE para incluir las plantillas
+$(document).ready(function() {
+    // ... código existente ...
+    
+    // Inicializar sistema de plantillas
+    initializeTemplateSystem();
+    initializeTemplateSearch();
+    
+    // Cargar plantilla por defecto si existe
+    const defaultTemplate = savedTemplates.find(t => t.isDefault);
+    if (defaultTemplate) {
+        $('#messageTemplate').val(defaultTemplate.content);
+        updateBulkButton();
+    }
+    
+    // Actualizar contador de caracteres para plantillas
+    $('#templateContent').on('input', function() {
+        const length = $(this).val().length;
+        $('#templateCharCount').text(`${length} caracteres`);
+    });
+});
+
+// ============================
+// FUNCIONES GLOBALES EXPUESTAS
 // ============================
 
 // Hacer funciones disponibles globalmente para onclick handlers
-window.showRealTimeStats = showRealTimeStats;
-window.hideRealTimeStats = hideRealTimeStats;
-window.downloadSuccessfulContacts = downloadSuccessfulContacts;
-window.downloadFailedContacts = downloadFailedContacts;
+window.editTemplate = editTemplate;
+window.duplicateTemplate = duplicateTemplate;
+window.deleteTemplate = deleteTemplate;
+window.setAsDefault = setAsDefault;
+window.exportTemplates = exportTemplates;
+window.importTemplates = importTemplates;

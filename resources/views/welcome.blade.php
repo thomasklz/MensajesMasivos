@@ -109,6 +109,11 @@
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="templates-tab" data-bs-toggle="tab" data-bs-target="#templates" type="button">
+                                    <i class="fas fa-file-alt me-2"></i>Plantillas Dinámicas
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button">
                                     <i class="fas fa-chart-bar me-2"></i>Estadísticas
                                 </button>
@@ -281,9 +286,20 @@
                                             </div>
                                             <div class="card-body">
                                                 <div class="mb-3">
-                                                    <label for="messageTemplate" class="form-label">
-                                                        <i class="fas fa-comment-dots me-1"></i>Mensaje Personalizable
-                                                    </label>
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                        <label for="messageTemplate" class="form-label mb-0">
+                                                            <i class="fas fa-comment-dots me-1"></i>Mensaje Personalizable
+                                                        </label>
+                                                        <div class="btn-group" role="group" aria-label="Opciones de plantilla">
+                                                            <button type="button" class="btn btn-sm btn-outline-primary" id="loadTemplateBtn">
+                                                                <i class="fas fa-folder-open me-1"></i>Cargar Plantilla
+                                                            </button>
+                                                            <button type="button" class="btn btn-sm btn-outline-success" id="saveAsTemplateBtn">
+                                                                <i class="fas fa-save me-1"></i>Guardar como Plantilla
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    
                                                     <textarea class="form-control" id="messageTemplate" rows="12">📢📢 *COMUNICADO* 📢📢
 Estimad@ cliente *{nombre}* de Cable Hogar
 
@@ -296,12 +312,28 @@ La *Planilla* 🧾 del *Mes* de *JUNIO* ya se encuentra disponible.
 *Para mayor información se puede comunicar al número +593 96 847 1674*
 
 *¡Le deseamos un excelente día 😊👌!*</textarea>
+                                                    
+                                                    <!-- Variables dinámicas expandidas -->
                                                     <div class="form-text">
                                                         <div class="alert alert-info p-2 mt-2">
                                                             <small>
                                                                 <strong><i class="fas fa-magic me-1"></i>Variables disponibles:</strong><br>
-                                                                <code>{nombre}</code> - Se reemplaza con el nombre del contacto<br>
-                                                                <code>{valor}</code> - Se reemplaza con el valor/monto del contacto
+                                                                <div class="row">
+                                                                    <div class="col-md-6">
+                                                                        <code>{nombre}</code> - Nombre del contacto<br>
+                                                                        <code>{valor}</code> - Valor/Monto<br>
+                                                                        <code>{fecha}</code> - Fecha actual<br>
+                                                                        <code>{mes}</code> - Mes actual<br>
+                                                                        <code>{año}</code> - Año actual
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <code>{telefono}</code> - Teléfono<br>
+                                                                        <code>{empresa}</code> - Nombre empresa<br>
+                                                                        <code>{personalizado1}</code> - Campo 1<br>
+                                                                        <code>{personalizado2}</code> - Campo 2<br>
+                                                                        <small class="text-muted">Y más variables personalizadas...</small>
+                                                                    </div>
+                                                                </div>
                                                             </small>
                                                         </div>
                                                     </div>
@@ -493,68 +525,324 @@ La *Planilla* 🧾 del *Mes* de *JUNIO* ya se encuentra disponible.
                                                 </div>
                                             </div>
                                             
-                                            <!-- Filtros de resultados -->
-                                            <div class="mb-3">
-                                                <label class="form-label"><i class="fas fa-filter me-1"></i>Filtrar resultados:</label>
-                                                <div class="btn-group" role="group">
-                                                    <input type="radio" class="btn-check" name="resultFilter" id="filterAll" checked>
-                                                    <label class="btn btn-outline-primary" for="filterAll">
-                                                        <i class="fas fa-list me-1"></i>Todos
-                                                    </label>
-                                                    
-                                                    <input type="radio" class="btn-check" name="resultFilter" id="filterSuccess">
-                                                    <label class="btn btn-outline-success" for="filterSuccess">
-                                                        <i class="fas fa-check me-1"></i>Exitosos
-                                                    </label>
-                                                    
-                                                    <input type="radio" class="btn-check" name="resultFilter" id="filterFailed">
-                                                    <label class="btn btn-outline-danger" for="filterFailed">
-                                                        <i class="fas fa-times me-1"></i>Fallidos
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Lista de resultados -->
-                                            <div id="detailedResults" style="max-height: 500px; overflow-y: auto;"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                                           <!-- Filtros de resultados -->
+                                           <div class="mb-3">
+                                               <label class="form-label"><i class="fas fa-filter me-1"></i>Filtrar resultados:</label>
+                                               <div class="btn-group" role="group">
+                                                   <input type="radio" class="btn-check" name="resultFilter" id="filterAll" checked>
+                                                   <label class="btn btn-outline-primary" for="filterAll">
+                                                       <i class="fas fa-list me-1"></i>Todos
+                                                   </label>
+                                                   
+                                                   <input type="radio" class="btn-check" name="resultFilter" id="filterSuccess">
+                                                   <label class="btn btn-outline-success" for="filterSuccess">
+                                                       <i class="fas fa-check me-1"></i>Exitosos
+                                                   </label>
+                                                   
+                                                   <input type="radio" class="btn-check" name="resultFilter" id="filterFailed">
+                                                   <label class="btn btn-outline-danger" for="filterFailed">
+                                                       <i class="fas fa-times me-1"></i>Fallidos
+                                                   </label>
+                                               </div>
+                                           </div>
+                                           
+                                           <!-- Lista de resultados -->
+                                           <div id="detailedResults" style="max-height: 500px; overflow-y: auto;"></div>
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
 
-                            <!-- PESTAÑA: Estadísticas -->
-                            <div class="tab-pane fade" id="stats" role="tabpanel">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div class="card border-0 shadow">
-                                            <div class="card-header bg-light">
-                                                <h5><i class="fas fa-chart-area me-2"></i>Estadísticas de Rendimiento del Sistema</h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <div id="performanceStats">
-                                                    <div class="text-center py-5">
-                                                        <i class="fas fa-chart-line fa-4x text-muted mb-3"></i>
-                                                        <h5 class="text-muted">Las estadísticas aparecerán aquí después de realizar envíos masivos</h5>
-                                                        <p class="text-muted">El sistema registrará automáticamente métricas de rendimiento, velocidad de envío y tasas de éxito.</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                           <!-- PESTAÑA: Plantillas Dinámicas -->
+                           <div class="tab-pane fade" id="templates" role="tabpanel">
+                               <div class="row">
+                                   <!-- Panel de gestión de plantillas -->
+                                   <div class="col-md-6">
+                                       <div class="card border-0 shadow">
+                                           <div class="card-header bg-light">
+                                               <h5><i class="fas fa-plus-circle me-2 text-success"></i>Crear Nueva Plantilla</h5>
+                                           </div>
+                                           <div class="card-body">
+                                               <form id="templateForm">
+                                                   <div class="mb-3">
+                                                       <label for="templateName" class="form-label">
+                                                           <i class="fas fa-tag me-1"></i>Nombre de la Plantilla
+                                                       </label>
+                                                       <input type="text" class="form-control" id="templateName" 
+                                                              placeholder="Ej: Recordatorio de Pago" required>
+                                                   </div>
+                                                   
+                                                   <div class="mb-3">
+                                                       <label for="templateCategory" class="form-label">
+                                                           <i class="fas fa-folder me-1"></i>Categoría
+                                                       </label>
+                                                       <select class="form-select" id="templateCategory">
+                                                           <option value="cobranza">Cobranza</option>
+                                                           <option value="promociones">Promociones</option>
+                                                           <option value="informativo">Informativo</option>
+                                                           <option value="soporte">Soporte</option>
+                                                           <option value="otro">Otro</option>
+                                                       </select>
+                                                   </div>
+                                                   
+                                                   <div class="mb-3">
+                                                       <label for="templateContent" class="form-label">
+                                                           <i class="fas fa-edit me-1"></i>Contenido de la Plantilla
+                                                       </label>
+                                                       <textarea class="form-control" id="templateContent" rows="8" 
+                                                                 placeholder="Escribe tu plantilla aquí..." required></textarea>
+                                                       <div class="form-text">
+                                                           <div class="alert alert-info p-2 mt-2">
+                                                               <small>
+                                                                   <strong><i class="fas fa-magic me-1"></i>Variables disponibles:</strong><br>
+                                                                   <code>{nombre}</code> - Nombre del contacto<br>
+                                                                   <code>{valor}</code> - Valor/Monto<br>
+                                                                   <code>{fecha}</code> - Fecha actual<br>
+                                                                   <code>{mes}</code> - Mes actual<br>
+                                                                   <code>{año}</code> - Año actual<br>
+                                                                   <code>{telefono}</code> - Teléfono del contacto<br>
+                                                                   <code>{empresa}</code> - Nombre de la empresa<br>
+                                                                   <code>{personalizado1}</code> - Campo personalizado 1<br>
+                                                                   <code>{personalizado2}</code> - Campo personalizado 2
+                                                               </small>
+                                                           </div>
+                                                       </div>
+                                                   </div>
+                                                   
+                                                   <div class="mb-3">
+                                                       <div class="form-check">
+                                                           <input class="form-check-input" type="checkbox" id="templateDefault">
+                                                           <label class="form-check-label" for="templateDefault">
+                                                               <i class="fas fa-star me-1"></i>Establecer como plantilla por defecto
+                                                           </label>
+                                                       </div>
+                                                   </div>
+                                                   
+                                                   <div class="d-grid gap-2">
+                                                       <button type="submit" class="btn btn-success" id="saveTemplateBtn">
+                                                           <i class="fas fa-save me-2"></i>Guardar Plantilla
+                                                       </button>
+                                                       <button type="button" class="btn btn-outline-primary" id="previewTemplateBtn">
+                                                           <i class="fas fa-eye me-2"></i>Vista Previa
+                                                       </button>
+                                                   </div>
+                                               </form>
+                                           </div>
+                                       </div>
+                                   </div>
+                                   
+                                   <!-- Panel de plantillas guardadas -->
+                                   <div class="col-md-6">
+                                       <div class="card border-0 shadow">
+                                           <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                               <h5 class="mb-0"><i class="fas fa-list me-2 text-primary"></i>Plantillas Guardadas</h5>
+                                               <div class="dropdown">
+                                                   <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                                           data-bs-toggle="dropdown">
+                                                       <i class="fas fa-filter me-1"></i>Filtrar
+                                                   </button>
+                                                   <ul class="dropdown-menu">
+                                                       <li><a class="dropdown-item filter-category" href="#" data-category="all">Todas</a></li>
+                                                       <li><a class="dropdown-item filter-category" href="#" data-category="cobranza">Cobranza</a></li>
+                                                       <li><a class="dropdown-item filter-category" href="#" data-category="promociones">Promociones</a></li>
+                                                       <li><a class="dropdown-item filter-category" href="#" data-category="informativo">Informativo</a></li>
+                                                       <li><a class="dropdown-item filter-category" href="#" data-category="soporte">Soporte</a></li>
+                                                       <li><a class="dropdown-item filter-category" href="#" data-category="otro">Otro</a></li>
+                                                   </ul>
+                                               </div>
+                                           </div>
+                                           <div class="card-body">
+                                               <div class="templates-counter mb-3"></div>
+                                               <div id="templatesList">
+                                                   <div class="text-center py-4">
+                                                       <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                                                       <p class="text-muted">No hay plantillas guardadas aún</p>
+                                                       <small class="text-muted">Crea tu primera plantilla para comenzar</small>
+                                                   </div>
+                                               </div>
+                                           </div>
+                                       </div>
+                                   </div>
+                               </div>
+                               
+                               <!-- Panel de vista previa -->
+                               <div class="row mt-4" id="templatePreviewSection" style="display: none;">
+                                   <div class="col-12">
+                                       <div class="card border-0 shadow">
+                                           <div class="card-header bg-light">
+                                               <h5><i class="fas fa-mobile-alt me-2 text-info"></i>Vista Previa del Mensaje</h5>
+                                           </div>
+                                           <div class="card-body">
+                                               <div class="row">
+                                                   <div class="col-md-6">
+                                                       <h6>Datos de Prueba:</h6>
+                                                       <div class="row">
+                                                           <div class="col-6">
+                                                               <input type="text" class="form-control form-control-sm mb-2" 
+                                                                      id="previewNombre" placeholder="Nombre" value="Juan Pérez">
+                                                           </div>
+                                                           <div class="col-6">
+                                                               <input type="text" class="form-control form-control-sm mb-2" 
+                                                                      id="previewValor" placeholder="Valor" value="$45.50">
+                                                           </div>
+                                                           <div class="col-6">
+                                                               <input type="text" class="form-control form-control-sm mb-2" 
+                                                                      id="previewTelefono" placeholder="Teléfono" value="593998765432">
+                                                           </div>
+                                                           <div class="col-6">
+                                                               <input type="text" class="form-control form-control-sm mb-2" 
+                                                                      id="previewEmpresa" placeholder="Empresa" value="Cable Hogar">
+                                                           </div>
+                                                           <div class="col-6">
+                                                               <input type="text" class="form-control form-control-sm mb-2" 
+                                                                      id="previewPersonalizado1" placeholder="Campo 1" value="">
+                                                           </div>
+                                                           <div class="col-6">
+                                                               <input type="text" class="form-control form-control-sm mb-2" 
+                                                                      id="previewPersonalizado2" placeholder="Campo 2" value="">
+                                                           </div>
+                                                       </div>
+                                                       <button type="button" class="btn btn-sm btn-primary" id="updatePreviewBtn">
+                                                           <i class="fas fa-sync me-1"></i>Actualizar Vista Previa
+                                                       </button>
+                                                   </div>
+                                                   <div class="col-md-6">
+                                                       <h6>Mensaje Renderizado:</h6>
+                                                       <div class="whatsapp-preview" id="whatsappPreview">
+                                                           <div class="message-bubble">
+                                                               <div id="previewContent">Selecciona una plantilla para ver la vista previa</div>
+                                                               <div class="message-time">
+                                                                   <span id="previewTime"></span>
+                                                                   <i class="fas fa-check-double text-success"></i>
+                                                               </div>
+                                                           </div>
+                                                       </div>
+                                                   </div>
+                                               </div>
+                                           </div>
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
 
-    <!-- JavaScript Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
-    
-    <!-- Custom JavaScript -->
-    <script src="{{ asset('js/whatsapp-system.js') }}"></script>
+                           <!-- PESTAÑA: Estadísticas -->
+                           <div class="tab-pane fade" id="stats" role="tabpanel">
+                               <div class="row">
+                                   <div class="col-12">
+                                       <div class="card border-0 shadow">
+                                           <div class="card-header bg-light">
+                                               <h5><i class="fas fa-chart-area me-2"></i>Estadísticas de Rendimiento del Sistema</h5>
+                                           </div>
+                                           <div class="card-body">
+                                               <div id="performanceStats">
+                                                   <div class="text-center py-5">
+                                                       <i class="fas fa-chart-line fa-4x text-muted mb-3"></i>
+                                                       <h5 class="text-muted">Las estadísticas aparecerán aquí después de realizar envíos masivos</h5>
+                                                       <p class="text-muted">El sistema registrará automáticamente métricas de rendimiento, velocidad de envío y tasas de éxito.</p>
+                                                   </div>
+                                               </div>
+                                           </div>
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           </div>
+       </div>
+   </div>
+
+   <!-- MODAL PARA SELECCIONAR PLANTILLAS -->
+   <div class="modal fade" id="templateSelectorModal" tabindex="-1">
+       <div class="modal-dialog modal-lg">
+           <div class="modal-content">
+               <div class="modal-header">
+                   <h5 class="modal-title">
+                       <i class="fas fa-folder-open me-2"></i>Seleccionar Plantilla
+                   </h5>
+                   <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+               </div>
+               <div class="modal-body">
+                   <div class="row">
+                       <div class="col-md-4">
+                           <div class="list-group" id="modalTemplatesList">
+                               <!-- Templates will be loaded here -->
+                           </div>
+                       </div>
+                       <div class="col-md-8">
+                           <div class="template-preview-container">
+                               <h6>Vista Previa:</h6>
+                               <div class="border rounded p-3" id="modalTemplatePreview">
+                                   <em class="text-muted">Selecciona una plantilla para ver la vista previa</em>
+                               </div>
+                               <div class="mt-3">
+                                   <strong>Categoría:</strong> <span id="modalTemplateCategory">-</span><br>
+                                   <strong>Creada:</strong> <span id="modalTemplateDate">-</span>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+               <div class="modal-footer">
+                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                   <button type="button" class="btn btn-primary" id="selectTemplateBtn" disabled>
+                       <i class="fas fa-check me-2"></i>Usar Esta Plantilla
+                   </button>
+               </div>
+           </div>
+       </div>
+   </div>
+
+   <!-- MODAL PARA GUARDAR PLANTILLA RÁPIDA -->
+   <div class="modal fade" id="saveTemplateModal" tabindex="-1">
+       <div class="modal-dialog">
+           <div class="modal-content">
+               <div class="modal-header">
+                   <h5 class="modal-title">
+                       <i class="fas fa-save me-2"></i>Guardar como Plantilla
+                   </h5>
+                   <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+               </div>
+               <div class="modal-body">
+                   <div class="mb-3">
+                       <label for="quickTemplateName" class="form-label">Nombre de la Plantilla</label>
+                       <input type="text" class="form-control" id="quickTemplateName" 
+                              placeholder="Ej: Recordatorio Junio 2025" required>
+                   </div>
+                   <div class="mb-3">
+                       <label for="quickTemplateCategory" class="form-label">Categoría</label>
+                       <select class="form-select" id="quickTemplateCategory">
+                           <option value="cobranza">Cobranza</option>
+                           <option value="promociones">Promociones</option>
+                           <option value="informativo">Informativo</option>
+                           <option value="soporte">Soporte</option>
+                           <option value="otro">Otro</option>
+                       </select>
+                   </div>
+                   <div class="form-check">
+                       <input class="form-check-input" type="checkbox" id="quickTemplateDefault">
+                       <label class="form-check-label" for="quickTemplateDefault">
+                           Establecer como plantilla por defecto
+                       </label>
+                   </div>
+               </div>
+               <div class="modal-footer">
+                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                   <button type="button" class="btn btn-success" id="saveQuickTemplateBtn">
+                       <i class="fas fa-save me-2"></i>Guardar Plantilla
+                   </button>
+               </div>
+           </div>
+       </div>
+   </div>
+
+   <!-- JavaScript Libraries -->
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
+   
+   <!-- Custom JavaScript -->
+   <script src="{{ asset('js/whatsapp-system.js') }}"></script>
 </body>
 </html>

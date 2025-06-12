@@ -467,3 +467,705 @@ hr {
         box-shadow: none !important;
     }
 }
+/* ============================
+   PLANTILLAS DINÁMICAS - CSS ADICIONAL
+   ============================ */
+
+/* Estilos para la vista previa de WhatsApp */
+.whatsapp-preview {
+    background: linear-gradient(to bottom, #075e54, #128c7e);
+    padding: 20px;
+    border-radius: 15px;
+    max-height: 400px;
+    overflow-y: auto;
+    position: relative;
+}
+
+.whatsapp-preview::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="chat-bg" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="2" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23chat-bg)"/></svg>');
+    opacity: 0.3;
+    border-radius: 15px;
+}
+
+.message-bubble {
+    background: #dcf8c6;
+    padding: 12px 16px;
+    border-radius: 18px 18px 4px 18px;
+    margin: 10px 20px 10px 50px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    position: relative;
+    z-index: 1;
+    word-wrap: break-word;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.message-bubble::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: -8px;
+    width: 0;
+    height: 0;
+    border: 8px solid transparent;
+    border-top-color: #dcf8c6;
+    border-right: 0;
+    border-bottom: 0;
+    margin-bottom: -8px;
+}
+
+.message-time {
+    text-align: right;
+    font-size: 11px;
+    color: #667781;
+    margin-top: 8px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Estilos para las plantillas guardadas */
+.template-item {
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: white;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.template-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: #007bff;
+}
+
+.template-item.selected {
+    border-color: #007bff;
+    background: #f8f9ff;
+    transform: scale(1.02);
+}
+
+.template-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--category-color, #6c757d);
+    transition: width 0.3s ease;
+}
+
+.template-item:hover::before {
+    width: 8px;
+}
+
+.template-header {
+    display: flex;
+    justify-content: between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.template-name {
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+    font-size: 1.1em;
+}
+
+.template-category {
+    font-size: 0.75em;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+    margin-left: auto;
+}
+
+.template-content-preview {
+    color: #6c757d;
+    font-size: 0.9em;
+    line-height: 1.4;
+    margin-bottom: 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.template-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8em;
+    color: #8e9ba7;
+}
+
+.template-actions {
+    display: flex;
+    gap: 5px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.template-item:hover .template-actions {
+    opacity: 1;
+}
+
+/* Colores por categoría */
+.template-item[data-category="cobranza"]::before {
+    background: #dc3545;
+}
+
+.template-item[data-category="promociones"]::before {
+    background: #28a745;
+}
+
+.template-item[data-category="informativo"]::before {
+    background: #007bff;
+}
+
+.template-item[data-category="soporte"]::before {
+    background: #ffc107;
+}
+
+.template-item[data-category="otro"]::before {
+    background: #6c757d;
+}
+
+.category-cobranza {
+    background: #dc3545;
+    color: white;
+}
+
+.category-promociones {
+    background: #28a745;
+    color: white;
+}
+
+.category-informativo {
+    background: #007bff;
+    color: white;
+}
+
+.category-soporte {
+    background: #ffc107;
+    color: #212529;
+}
+
+.category-otro {
+    background: #6c757d;
+    color: white;
+}
+
+/* Indicador de plantilla por defecto */
+.template-default {
+    position: relative;
+}
+
+.template-default::after {
+    content: '★';
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: #ffc107;
+    font-size: 1.2em;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* Estilos para el modal de selección */
+.modal-template-item {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modal-template-item:hover {
+    background: #f8f9fa;
+    border-color: #007bff;
+}
+
+.modal-template-item.selected {
+    background: #e3f2fd;
+    border-color: #007bff;
+    color: #1976d2;
+}
+
+.template-preview-container {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    min-height: 200px;
+}
+
+/* Variables dinámicas destacadas */
+.variable-highlight {
+    background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    color: #2c3e50;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+/* Botones de acción flotantes */
+.template-floating-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.template-item:hover .template-floating-actions {
+    opacity: 1;
+}
+
+.floating-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.floating-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.floating-btn.edit {
+    background: #007bff;
+    color: white;
+}
+
+.floating-btn.delete {
+    background: #dc3545;
+    color: white;
+}
+
+.floating-btn.duplicate {
+    background: #28a745;
+    color: white;
+}
+
+.floating-btn.set-default {
+    background: #ffc107;
+    color: #212529;
+}
+
+/* Animaciones */
+.template-item {
+    animation: slideInUp 0.3s ease;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Contador de caracteres para plantillas */
+.template-char-count {
+    position: absolute;
+    bottom: 10px;
+    right: 15px;
+    font-size: 0.75em;
+    color: #8e9ba7;
+    background: rgba(255,255,255,0.9);
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+/* Estilos para el editor de plantillas */
+.template-editor {
+    position: relative;
+}
+
+.template-variables-panel {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.variable-chip {
+    display: inline-block;
+    background: #e9ecef;
+    color: #495057;
+    padding: 4px 8px;
+    margin: 2px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.variable-chip:hover {
+    background: #007bff;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.variable-chip:active {
+    transform: scale(0.95);
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .whatsapp-preview {
+        margin: 0 -15px;
+        border-radius: 0;
+    }
+    
+    .message-bubble {
+        margin: 10px 15px 10px 35px;
+        padding: 10px 12px;
+    }
+    
+    .template-item {
+        margin-bottom: 10px;
+        padding: 12px;
+    }
+    
+    .template-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .template-category {
+        align-self: flex-start;
+    }
+    
+    .template-floating-actions {
+        position: static;
+        opacity: 1;
+        justify-content: flex-end;
+        margin-top: 10px;
+    }
+    
+    .floating-btn {
+        position: static;
+        width: 28px;
+        height: 28px;
+    }
+}
+
+/* Estados de carga */
+.template-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    color: #6c757d;
+}
+
+.template-loading::before {
+    content: '';
+    width: 32px;
+    height: 32px;
+    margin-right: 12px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Tooltip personalizado para variables */
+.variable-tooltip {
+    position: relative;
+    cursor: help;
+}
+
+.variable-tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.9);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 1000;
+}
+
+.variable-tooltip:hover::after {
+    opacity: 1;
+}
+
+/* Estilos para filtros de plantillas */
+.templates-filter {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.filter-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    margin: 3px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid #e9ecef;
+    background: white;
+    color: #6c757d;
+}
+
+.filter-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.filter-badge.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+/* Contador de plantillas */
+.templates-counter {
+    font-size: 0.9em;
+    color: #6c757d;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+/* Búsqueda de plantillas */
+.template-search {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.template-search .form-control {
+    padding-left: 40px;
+    border-radius: 25px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.template-search .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+}
+
+.template-search::before {
+    content: '\f002';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    z-index: 5;
+}
+
+/* Estados vacíos */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 4em;
+    margin-bottom: 20px;
+    opacity: 0.3;
+}
+
+.empty-state h5 {
+    margin-bottom: 10px;
+    color: #495057;
+}
+
+.empty-state p {
+    font-size: 0.9em;
+    margin-bottom: 20px;
+}
+
+/* Drag and drop para reordenar plantillas */
+.template-item.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+}
+
+.template-item.drag-over {
+    border-color: #007bff;
+    background: #f8f9ff;
+}
+
+/* Estilos para importar/exportar plantillas */
+.import-export-panel {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.import-export-panel .btn {
+    margin: 5px;
+}
+
+/* Validación de plantillas */
+.template-validation {
+    border-left: 4px solid #ffc107;
+    background: #fff3cd;
+    padding: 10px 15px;
+    margin: 10px 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.template-validation.valid {
+    border-left-color: #28a745;
+    background: #d4edda;
+}
+
+.template-validation.invalid {
+    border-left-color: #dc3545;
+    background: #f8d7da;
+}
+
+/* Historial de plantillas */
+.template-history {
+    max-height: 300px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.history-item {
+    padding: 8px 12px;
+    border-bottom: 1px solid #dee2e6;
+    font-size: 0.9em;
+    color: #6c757d;
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-item:hover {
+    background: white;
+    border-radius: 6px;
+}
+
+/* Tags para plantillas */
+.template-tags {
+    margin-top: 8px;
+}
+
+.template-tag {
+    display: inline-block;
+    background: #e9ecef;
+    color: #495057;
+    padding: 2px 8px;
+    margin: 2px;
+    border-radius: 10px;
+    font-size: 0.75em;
+}
+
+/* Indicadores de uso */
+.usage-indicator {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 0.7em;
+}
+
+/* Efectos de hover mejorados */
+.template-item {
+    overflow: hidden;
+    position: relative;
+}
+
+.template-item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.template-item:hover::after {
+    left: 100%;
+}
+
+/* Modo oscuro para vista previa */
+.whatsapp-preview.dark-mode {
+    background: linear-gradient(to bottom, #1f2937, #374151);
+}
+
+.whatsapp-preview.dark-mode .message-bubble {
+    background: #374151;
+    color: #f9fafb;
+}
+
+/* Scrollbar personalizada para lista de plantillas */
+#templatesList::-webkit-scrollbar {
+    width: 6px;
+}
+
+#templatesList::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+#templatesList::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+#templatesList::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
