@@ -113,11 +113,7 @@
                                     <i class="fas fa-file-alt me-2"></i>Plantillas Dinámicas
                                 </button>
                             </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button">
-                                    <i class="fas fa-chart-bar me-2"></i>Estadísticas
-                                </button>
-                            </li>
+                       
                         </ul>
 
                         <div class="tab-content mt-4" id="mainTabsContent">
@@ -238,7 +234,7 @@
                                                                     <strong><i class="fas fa-check text-success me-1"></i>Columnas requeridas:</strong> nombres, numero
                                                                 </div>
                                                                 <div class="col-12">
-                                                                    <strong><i class="fas fa-plus text-info me-1"></i>Columna opcional:</strong> valor
+                                                                    <strong><i class="fas fa-plus text-info me-1"></i>Columna opcional:</strong> valor, fecha, mes, año, telefono, empresa, personalizado1, personalizado2.
                                                                 </div>
                                                                 <div class="col-12">
                                                                     <strong><i class="fas fa-limit text-warning me-1"></i>Límite:</strong> 10,000 contactos máximo
@@ -725,27 +721,7 @@ La *Planilla* 🧾 del *Mes* de *JUNIO* ya se encuentra disponible.
                                </div>
                            </div>
 
-                           <!-- PESTAÑA: Estadísticas -->
-                           <div class="tab-pane fade" id="stats" role="tabpanel">
-                               <div class="row">
-                                   <div class="col-12">
-                                       <div class="card border-0 shadow">
-                                           <div class="card-header bg-light">
-                                               <h5><i class="fas fa-chart-area me-2"></i>Estadísticas de Rendimiento del Sistema</h5>
-                                           </div>
-                                           <div class="card-body">
-                                               <div id="performanceStats">
-                                                   <div class="text-center py-5">
-                                                       <i class="fas fa-chart-line fa-4x text-muted mb-3"></i>
-                                                       <h5 class="text-muted">Las estadísticas aparecerán aquí después de realizar envíos masivos</h5>
-                                                       <p class="text-muted">El sistema registrará automáticamente métricas de rendimiento, velocidad de envío y tasas de éxito.</p>
-                                                   </div>
-                                               </div>
-                                           </div>
-                                       </div>
-                                   </div>
-                               </div>
-                           </div>
+                          
                        </div>
                    </div>
                </div>
