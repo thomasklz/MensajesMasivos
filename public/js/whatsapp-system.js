@@ -149,22 +149,45 @@ function initializeSingleMessage() {
         const originalText = btn.html();
         btn.prop('disabled', true).html('<div class="custom-spinner"></div>Enviando...');
         
-        $.post('/whatsapp/send-single', {
+        // Crear objeto de contacto para procesamiento de variables
+        const contact = {
+            name: $('#singleContactName').val() || 'Cliente',
             phone: $('#phone').val(),
-            message: $('#message').val()
+            value: $('#singleContactValue').val() || ''
+        };
+        
+        // Procesar mensaje con variables dinámicas
+        const rawMessage = $('#message').val();
+        const processedMessage = processMessageWithVariables(rawMessage, contact);
+        
+        $.post('/whatsapp/send-single', {
+            phone: contact.phone,
+            message: processedMessage
         })
         .done(function(data) {
             if (data.success) {
                 Swal.fire({
                     icon: 'success',
                     title: '¡Mensaje Enviado!',
-                    text: 'El mensaje se envió correctamente',
-                    timer: 2000,
+                    html: `
+                        <div class="text-start">
+                            <p><strong>Para:</strong> ${contact.name} (${contact.phone})</p>
+                            <p><strong>Mensaje procesado enviado correctamente</strong></p>
+                            ${rawMessage !== processedMessage ? '<small class="text-muted">Variables reemplazadas automáticamente</small>' : ''}
+                        </div>
+                    `,
+                    timer: 3000,
                     showConfirmButton: false,
                     position: 'top-end',
                     toast: true
                 });
-                $('#singleMessageForm')[0].reset();
+                
+                // Limpiar formulario opcionalmente
+                const shouldClear = localStorage.getItem('auto_clear_single') !== 'false';
+                if (shouldClear) {
+                    $('#phone, #singleContactName, #singleContactValue').val('');
+                    updateSingleMessagePreview();
+                }
                 updateCharCount();
             } else {
                 Swal.fire({
@@ -198,8 +221,10 @@ function initializeSingleMessage() {
 
     // Contador de caracteres para mensaje individual
     $('#message').on('input', updateCharCount);
+    
+    // Inicializar plantillas para mensaje individual
+    initializeSingleMessageTemplates();
 }
-
 function updateCharCount() {
     const currentLength = $('#message').val().length;
     $('#charCount').text(`${currentLength}/4000`);
@@ -1037,6 +1062,17 @@ $(document).ready(function() {
             toast: true
         });
     }, 1000);
+  
+    
+    // Actualizar plantillas cuando se cree/modifique una plantilla
+    $(document).on('templateSaved templateUpdated', function() {
+        loadTemplatesInSingleSelector();
+    });
+    
+    // Configuración de auto-limpiar
+    if (localStorage.getItem('auto_clear_single') === null) {
+        localStorage.setItem('auto_clear_single', 'true');
+    }
 });
 
 /*
@@ -2048,6 +2084,232 @@ $(document).ready(function() {
         $('#templateCharCount').text(`${length} caracteres`);
     });
 });
+function initializeSingleMessageTemplates() {
+    loadTemplatesInSingleSelector();
+    initializeSingleMessageEvents();
+    updateSinglePreviewTime();
+    setInterval(updateSinglePreviewTime, 60000);
+}
+
+function loadTemplatesInSingleSelector() {
+    const selector = $('#singleTemplateSelector');
+    selector.addClass('loading');
+    
+    // Limpiar opciones existentes
+    selector.empty().append('<option value="">Seleccionar plantilla...</option>');
+    
+    if (savedTemplates && savedTemplates.length > 0) {
+        // Agrupar por categoría
+        const templatesByCategory = savedTemplates.reduce((acc, template) => {
+            const category = getCategoryName(template.category);
+            if (!acc[category]) acc[category] = [];
+            acc[category].push(template);
+            return acc;
+        }, {});
+        
+        // Agregar templates agrupados
+        Object.keys(templatesByCategory).forEach(categoryName => {
+            const optgroup = $(`<optgroup label="${categoryName}"></optgroup>`);
+            
+            templatesByCategory[categoryName].forEach(template => {
+                const isDefault = template.isDefault ? ' ⭐' : '';
+                const usageCount = template.usageCount ? ` (${template.usageCount} usos)` : '';
+                const option = $(`<option value="${template.id}">${template.name}${isDefault}${usageCount}</option>`);
+                optgroup.append(option);
+            });
+            
+            selector.append(optgroup);
+        });
+        
+        // Seleccionar plantilla por defecto si existe
+        const defaultTemplate = savedTemplates.find(t => t.isDefault);
+        if (defaultTemplate) {
+            selector.val(defaultTemplate.id);
+            $('#applySingleTemplateBtn').prop('disabled', false);
+        }
+    } else {
+        selector.append('<option disabled>No hay plantillas disponibles</option>');
+    }
+    
+    selector.removeClass('loading');
+}
+
+function initializeSingleMessageEvents() {
+    // Cambio en selector de plantillas
+    $('#singleTemplateSelector').change(function() {
+        const templateId = $(this).val();
+        $('#applySingleTemplateBtn').prop('disabled', !templateId);
+        
+        if (templateId) {
+            const template = getTemplateById(templateId);
+            if (template) {
+                // Mostrar vista previa de la plantilla seleccionada
+                updateSingleMessagePreview(template.content);
+            }
+        } else {
+            updateSingleMessagePreview('');
+        }
+    });
+    
+    // Aplicar plantilla seleccionada
+    $('#applySingleTemplateBtn').click(function() {
+        const templateId = $('#singleTemplateSelector').val();
+        if (!templateId) return;
+        
+        const template = getTemplateById(templateId);
+        if (template) {
+            $('#message').val(template.content).addClass('template-applied');
+            updateCharCount();
+            updateSingleMessagePreview();
+            
+            // Incrementar contador de uso
+            template.usageCount = (template.usageCount || 0) + 1;
+            saveTemplatesToStorage();
+            
+            // Animación de confirmación
+            setTimeout(() => {
+                $('#message').removeClass('template-applied');
+            }, 500);
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Plantilla Aplicada',
+                text: `Se aplicó la plantilla "${template.name}"`,
+                timer: 2000,
+                showConfirmButton: false,
+                position: 'top-end',
+                toast: true
+            });
+        }
+    });
+    
+    // Limpiar mensaje
+    $('#clearSingleMessageBtn').click(function() {
+        Swal.fire({
+            icon: 'question',
+            title: '¿Limpiar mensaje?',
+            text: '¿Estás seguro de que quieres limpiar el mensaje actual?',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, limpiar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $('#message').val('');
+                $('#singleContactName').val('');
+                $('#singleContactValue').val('');
+                $('#singleTemplateSelector').val('');
+                $('#applySingleTemplateBtn').prop('disabled', true);
+                updateCharCount();
+                updateSingleMessagePreview();
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Mensaje Limpiado',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    position: 'top-end',
+                    toast: true
+                });
+            }
+        });
+    });
+    
+    // Guardar mensaje actual como plantilla
+    $('#saveSingleAsTemplateBtn').click(function() {
+        const content = $('#message').val().trim();
+        if (!content) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Sin Contenido',
+                text: 'Escribe un mensaje antes de guardarlo como plantilla',
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
+        
+        // Pre-llenar modal con datos del formulario
+        const contactName = $('#singleContactName').val().trim();
+        if (contactName) {
+            $('#quickTemplateName').val(`Plantilla para ${contactName}`);
+        }
+        
+        $('#saveTemplateModal').modal('show');
+    });
+    
+    // Actualizar plantillas
+    $('#refreshSingleTemplatesBtn').click(function() {
+        const btn = $(this);
+        const originalHtml = btn.html();
+        
+        btn.html('<i class="fas fa-spinner fa-spin me-1"></i>Actualizando...')
+           .prop('disabled', true);
+        
+        setTimeout(() => {
+            loadTemplatesInSingleSelector();
+            btn.html(originalHtml).prop('disabled', false);
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Plantillas Actualizadas',
+                timer: 1500,
+                showConfirmButton: false,
+                position: 'top-end',
+                toast: true
+            });
+        }, 500);
+    });
+    
+    // Actualizar vista previa en tiempo real
+    $('#message, #singleContactName, #singleContactValue').on('input', function() {
+        updateSingleMessagePreview();
+    });
+}
+
+function updateSingleMessagePreview(templateContent = null) {
+    const content = templateContent || $('#message').val();
+    
+    if (!content.trim()) {
+        $('#singlePreviewContent').text('Escribe o selecciona una plantilla para ver la vista previa');
+        return;
+    }
+    
+    // Datos para reemplazo de variables
+    const previewData = {
+        nombre: $('#singleContactName').val() || 'Cliente',
+        valor: $('#singleContactValue').val() || '$0.00',
+        telefono: $('#phone').val() || '593XXXXXXXXX',
+        fecha: new Date().toLocaleDateString('es-ES'),
+        mes: new Date().toLocaleDateString('es-ES', { month: 'long' }).toUpperCase(),
+        año: new Date().getFullYear(),
+        empresa: 'Cable Hogar'
+    };
+    
+    // Reemplazar variables
+    let processedContent = content;
+    Object.keys(previewData).forEach(key => {
+        const regex = new RegExp(`{${key}}`, 'g');
+        processedContent = processedContent.replace(regex, previewData[key]);
+    });
+    
+    // Formatear para WhatsApp
+    processedContent = formatWhatsAppText(processedContent);
+    
+    // Actualizar vista previa
+    $('#singlePreviewContent').html(processedContent).addClass('preview-updated');
+    
+    setTimeout(() => {
+        $('#singlePreviewContent').removeClass('preview-updated');
+    }, 300);
+}
+
+function updateSinglePreviewTime() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('es-ES', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
+    $('#singlePreviewTime').text(timeString);
+}
 
 // ============================
 // FUNCIONES GLOBALES EXPUESTAS

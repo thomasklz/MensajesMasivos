@@ -1169,3 +1169,215 @@ hr {
 #templatesList::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+/* ============================
+   MENSAJE INDIVIDUAL CON PLANTILLAS - CSS ADICIONAL
+   ============================ */
+
+/* Vista previa WhatsApp para mensaje individual */
+.whatsapp-preview-single {
+    background: linear-gradient(to bottom, #075e54, #128c7e);
+    padding: 15px;
+    border-radius: 12px;
+    max-height: 250px;
+    overflow-y: auto;
+    position: relative;
+    min-height: 120px;
+}
+
+.whatsapp-preview-single::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="chat-bg-single" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="15" cy="15" r="1.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23chat-bg-single)"/></svg>');
+    opacity: 0.3;
+    border-radius: 12px;
+}
+
+.whatsapp-preview-single .message-bubble {
+    background: #dcf8c6;
+    padding: 10px 14px;
+    border-radius: 16px 16px 4px 16px;
+    margin: 8px 15px 8px 30px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    position: relative;
+    z-index: 1;
+    word-wrap: break-word;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+    max-width: 280px;
+}
+
+.whatsapp-preview-single .message-bubble::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: -6px;
+    width: 0;
+    height: 0;
+    border: 6px solid transparent;
+    border-top-color: #dcf8c6;
+    border-right: 0;
+    border-bottom: 0;
+    margin-bottom: -6px;
+}
+
+.whatsapp-preview-single .message-time {
+    text-align: right;
+    font-size: 10px;
+    color: #667781;
+    margin-top: 6px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 3px;
+}
+
+/* Selector de plantillas mejorado */
+#singleTemplateSelector {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+#singleTemplateSelector:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+}
+
+#singleTemplateSelector option {
+    padding: 8px;
+}
+
+/* Botones de acción para plantillas */
+.btn-outline-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+}
+
+.btn-outline-secondary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(108, 117, 125, 0.2);
+}
+
+.btn-outline-success:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+}
+
+.btn-outline-info:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(23, 162, 184, 0.2);
+}
+
+/* Campos de entrada mejorados */
+#singleContactName,
+#singleContactValue {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+#singleContactName:focus,
+#singleContactValue:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.15);
+}
+
+/* Indicadores de variables */
+.form-text .fas.fa-magic {
+    color: #17a2b8;
+}
+
+/* Variables destacadas en el alert */
+.alert-info code {
+    background: rgba(255,255,255,0.8);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: 600;
+    color: #0c5460;
+}
+
+/* Animación para aplicar plantilla */
+.template-applied {
+    animation: templateApplied 0.5s ease;
+}
+
+@keyframes templateApplied {
+    0% { 
+        background: #d4edda; 
+        transform: scale(1);
+    }
+    50% { 
+        background: #c3e6cb; 
+        transform: scale(1.02);
+    }
+    100% { 
+        background: white; 
+        transform: scale(1);
+    }
+}
+
+/* Loading state para selector */
+#singleTemplateSelector.loading {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="%23007bff"><animate attributeName="r" dur="1s" values="3;1;3" repeatCount="indefinite"/></circle></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .whatsapp-preview-single {
+        margin: 0 -10px;
+        border-radius: 8px;
+        padding: 12px;
+    }
+    
+    .whatsapp-preview-single .message-bubble {
+        margin: 5px 10px 5px 20px;
+        max-width: 100%;
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+    
+    .d-flex.gap-2 {
+        flex-direction: column;
+        gap: 8px !important;
+    }
+    
+    .flex-fill {
+        width: 100%;
+    }
+}
+
+/* Estados del botón de aplicar plantilla */
+#applySingleTemplateBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#applySingleTemplateBtn:not(:disabled):hover {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border-color: #007bff;
+}
+
+/* Estilo para campos con datos */
+#singleContactName:not(:placeholder-shown),
+#singleContactValue:not(:placeholder-shown) {
+    border-left: 4px solid #28a745;
+    background: rgba(40, 167, 69, 0.05);
+}
+
+/* Vista previa actualizada */
+.preview-updated {
+    animation: previewUpdate 0.3s ease;
+}
+
+@keyframes previewUpdate {
+    0% { opacity: 0.7; transform: scale(0.98); }
+    100% { opacity: 1; transform: scale(1); }
+}

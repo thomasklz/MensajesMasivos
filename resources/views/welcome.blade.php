@@ -119,62 +119,122 @@
                         <div class="tab-content mt-4" id="mainTabsContent">
                             <!-- PESTAÑA: Mensaje Individual -->
                             <div class="tab-pane fade show active" id="single" role="tabpanel">
-                                <div class="row">
-                                    <div class="col-lg-8 mx-auto">
-                                        <div class="card border-0 shadow">
-                                            <div class="card-header bg-light">
-                                                <h5 class="mb-0"><i class="fas fa-paper-plane me-2"></i>Enviar Mensaje Individual</h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <form id="singleMessageForm">
-                                                    <div class="row">
-                                                        <div class="col-md-6">
-                                                            <div class="mb-3">
-                                                                <label for="phone" class="form-label">
-                                                                    <i class="fas fa-phone me-1"></i>Número de Teléfono
-                                                                </label>
-                                                                <input type="text" class="form-control" id="phone" 
-                                                                       placeholder="593998765432" required>
-                                                                <div class="form-text">
-                                                                    <i class="fas fa-info-circle me-1"></i>
-                                                                    Incluir código de país (ej: 593998765432)
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <div class="mb-3">
-                                                                <label class="form-label">
-                                                                    <i class="fas fa-eye me-1"></i>Vista Previa
-                                                                </label>
-                                                                <div class="alert alert-info">
-                                                                    <i class="fab fa-whatsapp me-2"></i>
-                                                                    El mensaje se enviará tal como aparece abajo
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="message" class="form-label">
-                                                            <i class="fas fa-comment-dots me-1"></i>Mensaje
-                                                        </label>
-                                                        <textarea class="form-control" id="message" rows="6" required 
-                                                                  placeholder="Escribe tu mensaje aquí..." maxlength="4000"></textarea>
-                                                        <div class="form-text d-flex justify-content-between">
-                                                            <span><i class="fas fa-info-circle me-1"></i>Máximo 4000 caracteres</span>
-                                                            <span id="charCount">0/4000</span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="text-center">
-                                                        <button type="submit" class="btn btn-success btn-lg" id="sendSingleBtn">
-                                                            <i class="fas fa-paper-plane me-2"></i>Enviar Mensaje
-                                                        </button>
-                                                    </div>
-                                                </form>
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-paper-plane me-2"></i>Enviar Mensaje Individual</h5>
+                </div>
+                <div class="card-body">
+                    <form id="singleMessageForm">
+                        <div class="row">
+                            <!-- Columna izquierda - Datos del contacto -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">
+                                        <i class="fas fa-phone me-1"></i>Número de Teléfono
+                                    </label>
+                                    <input type="text" class="form-control" id="phone" 
+                                           placeholder="593998765432" required>
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Incluir código de país (ej: 593998765432)
+                                    </div>
+                                </div>
+
+                                <!-- Datos adicionales para variables -->
+                                <div class="mb-3">
+                                    <label for="singleContactName" class="form-label">
+                                        <i class="fas fa-user me-1"></i>Nombre del Contacto
+                                    </label>
+                                    <input type="text" class="form-control" id="singleContactName" 
+                                           placeholder="Nombre completo">
+                                    <div class="form-text">
+                                        <i class="fas fa-magic me-1"></i>Nombre del cliente
+                                    </div>
+                                </div>
+
+                            
+
+                                <!-- Vista previa de WhatsApp -->
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="fab fa-whatsapp me-1"></i>Vista Previa WhatsApp
+                                    </label>
+                                    <div class="whatsapp-preview-single" id="singleWhatsappPreview">
+                                        <div class="message-bubble">
+                                            <div id="singlePreviewContent">Escribe o selecciona una plantilla para ver la vista previa</div>
+                                            <div class="message-time">
+                                                <span id="singlePreviewTime"></span>
+                                                <i class="fas fa-check-double text-success"></i>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Columna derecha - Mensaje y plantillas -->
+                            <div class="col-md-6">
+                                <!-- Selector de plantillas -->
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="form-label mb-0">
+                                            <i class="fas fa-file-alt me-1"></i>Plantillas Rápidas
+                                        </label>
+                                        <button type="button" class="btn btn-sm btn-outline-info" id="refreshSingleTemplatesBtn">
+                                            <i class="fas fa-sync me-1"></i>Actualizar
+                                        </button>
+                                    </div>
+                                    
+                                    <select class="form-select" id="singleTemplateSelector">
+                                        <option value="">Seleccionar plantilla...</option>
+                                        <!-- Las plantillas se cargarán dinámicamente aquí -->
+                                    </select>
+                                    
+                                    <div class="d-flex gap-2 mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-primary flex-fill" id="applySingleTemplateBtn" disabled>
+                                            <i class="fas fa-check me-1"></i>Aplicar Plantilla
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" id="clearSingleMessageBtn">
+                                            <i class="fas fa-eraser me-1"></i>Limpiar
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Editor de mensaje -->
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label for="message" class="form-label mb-0">
+                                            <i class="fas fa-comment-dots me-1"></i>Mensaje
+                                        </label>
+                                     
+                                    </div>
+                                    
+                                    <textarea class="form-control" id="message" rows="10" required 
+                                              placeholder="Escribe tu mensaje aquí o selecciona una plantilla..." maxlength="4000"></textarea>
+                                    
+                                    <div class="form-text d-flex justify-content-between">
+                                        <span><i class="fas fa-info-circle me-1"></i>Máximo 4000 caracteres</span>
+                                        <span id="charCount">0/4000</span>
+                                    </div>
+                                </div>
+
+                              
+
+                                <!-- Botón de envío -->
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-success btn-lg w-100" id="sendSingleBtn">
+                                        <i class="fas fa-paper-plane me-2"></i>Enviar Mensaje
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
                             <!-- PESTAÑA: Mensajes Masivos -->
                             <div class="tab-pane fade" id="bulk" role="tabpanel">
