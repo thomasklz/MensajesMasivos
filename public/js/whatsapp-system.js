@@ -354,17 +354,9 @@ function displayContacts(contacts) {
             </div>
         `;
     });
+ 
     
-    if (contacts.length > previewLimit) {
-        html += `
-            <div class="text-center text-muted mt-3 py-2">
-                <i class="fas fa-ellipsis-h me-2"></i>
-                y ${contacts.length - previewLimit} contactos más
-            </div>
-        `;
-    }
-    
-    $('#contactsList').html(html);
+   // $('#contactsList').html(html);
     $('#contactsPreview').slideDown();
 }
 

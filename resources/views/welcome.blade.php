@@ -328,7 +328,7 @@
                                                             </span>
                                                         </div>
                                                     </div>
-                                                    <div class="contact-preview" id="contactsList"></div>
+                                                 
                                                 </div>
                                             </div>
                                         </div>
