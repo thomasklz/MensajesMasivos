@@ -1,0 +1,469 @@
+/* ============================
+   SISTEMA WHATSAPP MASIVO - CSS
+   ============================ */
+
+/* Indicadores de estado */
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.status-connected { 
+    background-color: #28a745; 
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.6);
+}
+
+.status-disconnected { 
+    background-color: #dc3545; 
+    box-shadow: 0 0 10px rgba(220, 53, 69, 0.6);
+}
+
+.status-processing { 
+    background-color: #ffc107; 
+    animation: pulse-status 1.5s infinite;
+    box-shadow: 0 0 15px rgba(255, 193, 7, 0.8);
+}
+
+@keyframes pulse-status {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* Contenedores principales */
+.contact-preview {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+}
+
+.batch-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin: 20px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.stats-card {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+
+/* Barra de progreso avanzada - DISEÑO MEJORADO */
+.progress-advanced {
+    height: 25px;
+    border-radius: 15px;
+    overflow: hidden;
+    background: #e9ecef;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+.progress-bar-advanced {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    transition: width 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+}
+
+.progress-bar-advanced::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Resultados */
+.result-item {
+    padding: 12px 15px;
+    margin: 6px 0;
+    border-radius: 8px;
+    border-left: 4px solid;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.result-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.result-success { 
+    background-color: #d4edda; 
+    border-left-color: #28a745; 
+}
+
+.result-error { 
+    background-color: #f8d7da; 
+    border-left-color: #dc3545; 
+}
+
+/* Controles de lote */
+.batch-controls {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    padding: 25px;
+    margin: 20px 0;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+/* Stats en tiempo real */
+.real-time-stats {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1050;
+    background: rgba(0,0,0,0.9);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    min-width: 280px;
+    display: none;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.real-time-stats .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.real-time-stats .close-btn:hover {
+    opacity: 1;
+}
+
+/* Indicadores de velocidad */
+.speed-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: pulse-speed 2s infinite;
+}
+
+.speed-slow { 
+    background-color: #dc3545; 
+    box-shadow: 0 0 10px rgba(220, 53, 69, 0.6);
+}
+
+.speed-medium { 
+    background-color: #ffc107; 
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.6);
+}
+
+.speed-fast { 
+    background-color: #28a745; 
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.6);
+}
+
+@keyframes pulse-speed {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* Timer y contadores */
+.countdown-timer {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #007bff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Tabs personalizados */
+.nav-tabs .nav-link {
+    border-radius: 10px 10px 0 0;
+    margin-right: 5px;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.nav-tabs .nav-link.active {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border-color: #007bff;
+}
+
+/* Botones mejorados */
+.btn-success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+}
+
+/* Alertas mejoradas */
+.alert {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .real-time-stats {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+    }
+    
+    .batch-info {
+        padding: 15px;
+        margin: 10px 0;
+    }
+    
+    .stats-card {
+        margin-bottom: 10px;
+        padding: 15px;
+    }
+    
+    .batch-controls {
+        padding: 15px;
+        margin: 10px 0;
+    }
+}
+
+/* Animaciones de entrada */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading spinner personalizado */
+.custom-spinner {
+    border: 3px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 3px solid #007bff;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Estilos adicionales para formularios */
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Mejoras visuales para cards */
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Badges personalizados */
+.badge {
+    font-size: 0.8em;
+    padding: 0.4em 0.6em;
+}
+
+/* Separadores */
+hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #dee2e6, transparent);
+    margin: 1.5rem 0;
+}
+
+/* Tooltips personalizados */
+.tooltip-inner {
+    background-color: rgba(0,0,0,0.9);
+    border-radius: 6px;
+}
+
+/* Scrollbar personalizada */
+.contact-preview::-webkit-scrollbar,
+#detailedResults::-webkit-scrollbar {
+    width: 6px;
+}
+
+.contact-preview::-webkit-scrollbar-track,
+#detailedResults::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.contact-preview::-webkit-scrollbar-thumb,
+#detailedResults::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.contact-preview::-webkit-scrollbar-thumb:hover,
+#detailedResults::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Efectos de hover mejorados */
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.nav-link:hover {
+    color: #007bff;
+}
+
+/* Estilos para el header */
+.card-header.bg-primary {
+    background: linear-gradient(135deg, #007bff, #0056b3) !important;
+    border-radius: 0.375rem 0.375rem 0 0;
+}
+
+/* Mejoras en los filtros de resultados */
+.btn-group .btn-check:checked + .btn {
+    transform: scale(1.05);
+}
+
+/* Animación para elementos que aparecen */
+.slide-down {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Estilos para texto de ayuda */
+.form-text {
+    font-size: 0.875em;
+    color: #6c757d;
+}
+
+/* Mejoras en las alertas de SweetAlert2 */
+.swal2-popup {
+    border-radius: 15px;
+}
+
+.swal2-title {
+    font-size: 1.5em;
+}
+
+/* Estilos específicos para móviles */
+@media (max-width: 576px) {
+    .container-fluid {
+        padding: 0.5rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .btn-lg {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+    }
+    
+    .stats-card {
+        padding: 10px;
+        margin-bottom: 8px;
+    }
+    
+    .countdown-timer {
+        font-size: 1.1em;
+    }
+}
+
+/* Estilos para impresión */
+@media print {
+    .real-time-stats,
+    .btn,
+    .nav-tabs {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #dee2e6 !important;
+        box-shadow: none !important;
+    }
+}
